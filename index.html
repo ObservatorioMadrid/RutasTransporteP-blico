@@ -121,7 +121,7 @@ details p{margin:6px 0 2px;font-size:13.5px}
       <ul class="list" id="par-list"></ul>
     </div>
     <div id="msg"></div>
-    <p class="foot">Información de referencia. Los horarios y frecuencias están sujetos a confirmación con el operador del servicio. Observatorio Interinstitucional de Madrid (OIM) · Alcaldía Municipal de Madrid.</p>
+    <p class="foot">Observatorio Interinstitucional de Madrid (OIM) · Alcaldía Municipal de Madrid.</p>
   </section>
   <div id="map" role="application" aria-label="Mapa de rutas y paraderos"></div>
 </div>
@@ -146,9 +146,16 @@ const state = { tab: "rutas", groups: [], byId: new Map(), sel: null, selT: null
 
 /* ---------- Mapa ---------- */
 const map = L.map("map").setView([4.73, -74.26], 13);
-L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}", {
-  attribution: "Tiles © Esri", maxZoom: 19
-}).addTo(map);
+const esriTiles = (path, opt = {}) => L.tileLayer(`https://server.arcgisonline.com/ArcGIS/rest/services/${path}/MapServer/tile/{z}/{y}/{x}`, { attribution: "Tiles © Esri", maxZoom: 19, ...opt });
+const bases = {
+  "Claro": esriTiles("Canvas/World_Light_Gray_Base", { maxNativeZoom: 16 }),
+  "Oscuro": esriTiles("Canvas/World_Dark_Gray_Base", { maxNativeZoom: 16 }),
+  "Calles": L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", { attribution: "© OpenStreetMap", maxZoom: 19 }),
+  "Satélite": esriTiles("World_Imagery", { attribution: "Imagery © Esri, Maxar, Earthstar Geographics" })
+};
+const darkUI = window.matchMedia("(prefers-color-scheme: dark)").matches;
+bases[darkUI ? "Oscuro" : "Claro"].addTo(map);
+L.control.layers(bases, null, { position: "topright", collapsed: true }).addTo(map);
 const lineLayer = L.layerGroup().addTo(map);
 const parLayer = L.layerGroup().addTo(map);
 let barLayer = null, barLoading = false;
@@ -335,7 +342,6 @@ function renderDetail() {
   const franjasHtml = franjas.length
     ? `<h3>Franjas de servicio</h3><table><thead><tr><th>Días</th><th>Franja</th><th>Cada (min)</th></tr></thead><tbody>${franjas.map(r => `<tr><td>${esc(r.dias)}</td><td>${esc(r.franja)}</td><td>${esc(r.intervalo_min)}</td></tr>`).join("")}</tbody></table>`
     : "";
-  const obs = txt(p.observacion);
   const rows = state.rb.get(t.id) || [];
   const barrios = rows.filter(r => txt(r.tipo).toLowerCase() !== "referencia");
   const refs = rows.filter(r => txt(r.tipo).toLowerCase() === "referencia").map(r => txt(r.barrio));
@@ -354,7 +360,6 @@ function renderDetail() {
     ${dir}
     <h3>Horario</h3>
     <div class="kv">${kv("Días", txt(p.dias))}${kv("Horario", txt(p.horario))}${kv("Frecuencia", fr ? `cada ${fr} min` : "")}</div>
-    ${obs ? `<div class="note">${esc(obs)}</div>` : ""}
     ${franjasHtml}
     <h3>Por dónde pasa</h3>
     <p style="margin:0"><b>Vías principales:</b> ${txt(p.calles_principales) ? esc(p.calles_principales) : `<span class="chip">Por confirmar</span>`}</p>
