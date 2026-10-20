@@ -10,19 +10,19 @@
 :root{
   --bg:#f5f6f8; --panel:#ffffff; --ink:#1c2430; --muted:#5d6877; --line:#dde1e7;
   --brand:#0b5a8f; --brand-ink:#ffffff; --soft:#eaf2f8; --warn-bg:#fff6df; --warn-ink:#7a5a00;
-  --shadow:0 1px 3px rgba(20,30,50,.12);
+  --chip-dark:#1c2430; --chip-dark-ink:#ffffff; --shadow:0 1px 3px rgba(20,30,50,.18);
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
     --bg:#12171d; --panel:#1a212a; --ink:#e8ecf1; --muted:#9aa6b4; --line:#2c3643;
     --brand:#5db0e6; --brand-ink:#0d1722; --soft:#202c39; --warn-bg:#3a3017; --warn-ink:#f1d27a;
-    --shadow:0 1px 3px rgba(0,0,0,.5);
+    --chip-dark:#000000; --chip-dark-ink:#ffffff; --shadow:0 1px 3px rgba(0,0,0,.6);
   }
 }
 :root[data-theme="dark"]{
   --bg:#12171d; --panel:#1a212a; --ink:#e8ecf1; --muted:#9aa6b4; --line:#2c3643;
   --brand:#5db0e6; --brand-ink:#0d1722; --soft:#202c39; --warn-bg:#3a3017; --warn-ink:#f1d27a;
-  --shadow:0 1px 3px rgba(0,0,0,.5);
+  --chip-dark:#000000; --chip-dark-ink:#ffffff; --shadow:0 1px 3px rgba(0,0,0,.6);
 }
 *{box-sizing:border-box}
 html,body{height:100%;margin:0}
@@ -33,61 +33,74 @@ header.top p{margin:0 0 8px;color:var(--muted);font-size:13px}
 .tabs{display:flex;gap:4px}
 .tabs button{appearance:none;border:0;background:none;color:var(--muted);font:inherit;font-weight:600;padding:9px 14px;border-bottom:3px solid transparent;cursor:pointer}
 .tabs button[aria-selected="true"]{color:var(--brand);border-bottom-color:var(--brand)}
-.tabs button:focus-visible,.btn:focus-visible,.item:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+.tabs button:focus-visible,.btn:focus-visible,.item:focus-visible,input:focus-visible,select:focus-visible,.seg button:focus-visible,.tg:focus-visible,.stoplink:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
 .app{flex:1;min-height:0;display:grid;grid-template-columns:400px 1fr}
 #panel{background:var(--panel);overflow:auto;border-right:1px solid var(--line);padding:14px 16px 24px}
 #map{min-height:0;background:#dfe6ea}
+.app.collapsed{grid-template-columns:0 1fr}
+.app.collapsed #panel{padding:0;overflow:hidden;border:0;visibility:hidden}
 @media (max-width:820px){
   .app{display:flex;flex-direction:column}
   #map{order:1;height:42dvh;flex:none}
   #panel{order:2;flex:1;border-right:0;border-top:1px solid var(--line)}
+  .app.collapsed #panel{display:none}
+  .app.collapsed #map{height:auto;flex:1}
 }
 label.lbl{display:block;font-size:12px;font-weight:600;color:var(--muted);margin:0 0 4px}
 input[type=search],select{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);font:inherit}
-.row{display:flex;gap:8px;margin-bottom:10px}
-.row>*{flex:1}
 ul.list{list-style:none;margin:10px 0 0;padding:0;display:flex;flex-direction:column;gap:8px}
 .item{width:100%;text-align:left;display:flex;gap:12px;align-items:center;padding:11px 12px;border:1px solid var(--line);border-radius:10px;background:var(--panel);color:var(--ink);font:inherit;cursor:pointer}
 .item:hover{background:var(--soft)}
 .item .dot{width:12px;height:34px;border-radius:6px;flex:none}
+.item .go{margin-left:auto;color:var(--muted);font-size:20px}
 .item strong{display:block;font-weight:650}
 .item small{color:var(--muted)}
 .count{color:var(--muted);font-size:13px;margin:8px 0 0}
 .btn{appearance:none;border:1px solid var(--line);background:var(--panel);color:var(--ink);padding:7px 12px;border-radius:8px;font:inherit;font-weight:600;cursor:pointer}
-.btn.primary{background:var(--brand);border-color:var(--brand);color:var(--brand-ink)}
+.btn:hover{background:var(--soft)}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap}
 .chips{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 0}
 .chip{display:inline-block;padding:3px 9px;border-radius:999px;background:var(--soft);font-size:12.5px;border:1px solid var(--line);color:var(--ink)}
 button.chip{cursor:pointer;font:inherit;font-size:12.5px}
-button.chip[aria-pressed="true"]{background:var(--brand);color:var(--brand-ink);border-color:var(--brand)}
 .badge{display:inline-block;font-weight:700;font-size:12px;padding:2px 8px;border-radius:6px;color:#fff;margin-right:6px;vertical-align:middle}
-h2.name{font-size:19px;margin:10px 0 2px;line-height:1.25}
+h2.name{font-size:20px;margin:12px 0 2px;line-height:1.25}
 .sub{color:var(--muted);margin:0 0 6px}
-h3{font-size:13px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin:18px 0 6px}
-.kv{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-.kv div{background:var(--soft);border-radius:10px;padding:8px 10px}
-.kv span{display:block;font-size:11.5px;color:var(--muted);font-weight:600}
-.kv b{font-weight:650;font-size:14px}
-.pending{color:var(--warn-ink);background:var(--warn-bg)!important}
-.note{background:var(--warn-bg);color:var(--warn-ink);padding:8px 10px;border-radius:8px;font-size:13px;margin-top:8px}
-table{width:100%;border-collapse:collapse;font-size:13.5px}
-th,td{text-align:left;padding:6px 6px;border-bottom:1px solid var(--line)}
-th{color:var(--muted);font-size:12px}
-details{border:1px solid var(--line);border-radius:8px;padding:6px 10px;margin-top:6px}
-details summary{cursor:pointer;font-weight:600}
-details p{margin:6px 0 2px;font-size:13.5px}
+h3{font-size:13px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin:20px 0 8px}
+h4{font-size:13px;margin:12px 0 0;color:var(--ink)}
+.seg{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:6px}
+.seg button{appearance:none;text-align:left;padding:8px 10px;border:1.5px solid var(--line);border-radius:10px;background:var(--panel);color:var(--ink);font:inherit;cursor:pointer;display:block}
+.seg button b{display:block;font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.seg button span{font-size:13.5px;font-weight:600;line-height:1.25;display:block;margin-top:2px}
+.seg button[aria-pressed="true"]{border-color:var(--brand);background:var(--soft)}
+.seg button[aria-pressed="true"] b{color:var(--brand)}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.stats div{background:var(--soft);border:1px solid var(--line);border-radius:10px;padding:8px 10px;text-align:center}
+.stats span{display:block;font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.stats b{font-size:19px;font-weight:700}
+.sched{display:flex;align-items:center;gap:10px;margin:8px 0}
+.dchip{display:inline-block;min-width:46px;text-align:center;background:var(--chip-dark);color:var(--chip-dark-ink);font-weight:700;border-radius:8px;padding:5px 9px;font-size:15px}
+.sched .tr{font-size:17px;font-weight:500}
+.freq{margin:6px 0 0;color:var(--muted)}
+.freq b{color:var(--ink)}
+.slot{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--line)}
+.slot .dchip{font-size:12.5px;padding:3px 7px;min-width:40px}
+.slot .tr{flex:1}
+.slot .ev{color:var(--muted);white-space:nowrap}
+.pending{background:var(--warn-bg);color:var(--warn-ink);padding:10px 12px;border-radius:10px;font-weight:600}
 .stoplink{display:block;width:100%;text-align:left;background:none;border:0;border-bottom:1px solid var(--line);padding:8px 2px;color:var(--ink);font:inherit;cursor:pointer}
 .stoplink:hover{background:var(--soft)}
 .empty,.err{padding:14px;border-radius:10px;background:var(--soft);color:var(--muted);margin-top:12px}
 .err{background:var(--warn-bg);color:var(--warn-ink)}
 .foot{margin-top:22px;font-size:12px;color:var(--muted);border-top:1px solid var(--line);padding-top:10px}
-.legend{background:var(--panel);color:var(--ink);padding:8px 10px;border-radius:10px;box-shadow:var(--shadow);font-size:12.5px;max-width:230px}
-.legend summary{font-weight:700;border:0;padding:0}
-.legend details{border:0;padding:0;margin:0}
+.legend{background:var(--panel);color:var(--ink);padding:8px 10px;border-radius:10px;box-shadow:var(--shadow);font-size:12.5px;max-width:240px}
+.legend summary{font-weight:700;cursor:pointer}
 .legend .li{display:flex;align-items:center;gap:8px;margin-top:6px}
 .legend .sw{width:26px;height:0;border-top:4px solid;flex:none}
 .legend .pt{width:12px;height:12px;border-radius:50%;border:2px solid #0b3b66;background:#fff;flex:none;margin:0 7px}
 .legend label{display:flex;gap:6px;align-items:center;margin-top:8px;cursor:pointer}
+.tg{appearance:none;background:var(--panel);color:var(--ink);border:0;border-radius:8px;box-shadow:var(--shadow);padding:8px 12px;font:inherit;font-weight:650;cursor:pointer}
 .leaflet-container{font:inherit}
+.arrow{background:none;border:0}
 </style>
 </head>
 <body>
@@ -100,7 +113,7 @@ details p{margin:6px 0 2px;font-size:13.5px}
   </nav>
 </header>
 
-<div class="app">
+<div class="app" id="app">
   <section id="panel" aria-live="polite">
     <div id="view-rutas" role="tabpanel" aria-labelledby="tab-btn-rutas">
       <div id="rutas-list-view">
@@ -141,8 +154,23 @@ const lc = o => { const r = {}; for (const k in (o || {})) r[k.toLowerCase()] = 
 const txt = v => (v == null || String(v).trim() === "" || String(v).trim() === "<Null>") ? "" : String(v).trim();
 const split = s => txt(s).split(",").map(x => x.trim()).filter(Boolean);
 const codeOf = s => { const m = String(s || "").toUpperCase().match(/R\s?\d+/g) || []; return [...new Set(m.map(x => "R" + String(parseInt(x.replace(/\D/g, ""), 10)).padStart(2, "0")))]; };
+const byName = (a, b) => a.localeCompare(b, "es");
 
-const state = { tab: "rutas", groups: [], byId: new Map(), sel: null, selT: null, par: [], selPar: null, hor: new Map(), rb: new Map(), loaded: false };
+/* ---------- Formato de horarios ---------- */
+const abbr = d => txt(d).replace(/Lun/g, "L").replace(/Mar/g, "M").replace(/Vie/g, "V").replace(/Sáb/g, "S").replace(/Dom/g, "D").replace(/Fest/g, "F");
+const t12 = (h, m) => `${(h % 12) || 12}:${m} ${h >= 12 && h < 24 ? "PM" : "AM"}`;
+function range12(s) {
+  const m = String(s).match(/(\d{1,2}):(\d{2})\s*[–-]\s*(\d{1,2}):(\d{2})/);
+  return m ? `${t12(+m[1], m[2])} – ${t12(+m[3], m[4])}` : txt(s);
+}
+function scheduleParts(dias, horario) {
+  const out = [];
+  for (const part of txt(horario).split("·")) {
+    const m = part.trim().match(/^(?:([^\d]+?)\s+)?(\d{1,2}:\d{2}\s*[–-]\s*\d{1,2}:\d{2})/);
+    if (m) out.push({ d: txt(m[1]) || abbr(dias), r: range12(m[2]) });
+  }
+  return out;
+}
 
 /* ---------- Mapa ---------- */
 const map = L.map("map").setView([4.73, -74.26], 13);
@@ -153,12 +181,14 @@ const bases = {
   "Calles": L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", { attribution: "© OpenStreetMap", maxZoom: 19 }),
   "Satélite": esriTiles("World_Imagery", { attribution: "Imagery © Esri, Maxar, Earthstar Geographics" })
 };
-const darkUI = window.matchMedia("(prefers-color-scheme: dark)").matches;
-bases[darkUI ? "Oscuro" : "Claro"].addTo(map);
+bases[window.matchMedia("(prefers-color-scheme: dark)").matches ? "Oscuro" : "Claro"].addTo(map);
 L.control.layers(bases, null, { position: "topright", collapsed: true }).addTo(map);
 const lineLayer = L.layerGroup().addTo(map);
+const arrowLayer = L.layerGroup().addTo(map);
 const parLayer = L.layerGroup().addTo(map);
 let barLayer = null, barLoading = false;
+
+const state = { tab: "rutas", groups: [], byId: new Map(), sel: null, selT: null, par: [], selPar: null, hor: new Map(), rb: new Map() };
 
 /* ---------- Datos ---------- */
 async function query(id, geo) {
@@ -179,9 +209,9 @@ async function init() {
     for (const f of rb.features) { const a = lc(f.attributes); const k = Number(a.id_tramo); if (!state.rb.has(k)) state.rb.set(k, []); state.rb.get(k).push(a); }
     buildRoutes(rut.features);
     buildStops(par.features);
-    state.loaded = true;
     renderList(); renderParList(); updateMarkers(); styleLines();
-    const b = lineLayer.getLayers().length ? L.featureGroup(lineLayer.getLayers()).getBounds() : null;
+    const all = lineLayer.getLayers();
+    const b = all.length ? L.featureGroup(all).getBounds() : null;
     if (b && b.isValid()) map.fitBounds(b.pad(0.08));
   } catch (e) {
     console.error(e);
@@ -189,28 +219,58 @@ async function init() {
   }
 }
 
+function lengthM(ll) {
+  if (!ll || !ll.length) return 0;
+  if (Array.isArray(ll[0])) return ll.reduce((s, x) => s + lengthM(x), 0);
+  let d = 0; for (let i = 1; i < ll.length; i++) d += ll[i - 1].distanceTo(ll[i]); return d;
+}
+function lines(ll) { return (ll && ll.length && Array.isArray(ll[0])) ? ll.flatMap(lines) : (ll && ll.length ? [ll] : []); }
+
 function buildRoutes(features) {
   const groups = new Map();
   for (const f of features) {
     const p = lc(f.properties);
-    const t = { id: Number(p.id_tramo), p, g: null, layer: null };
+    const t = { id: Number(p.id_tramo), p, g: null, layer: null, km: 0, kind: "", label: "" };
     const gid = txt(p.id_ruta) || ("T" + t.id);
     if (!groups.has(gid)) groups.set(gid, { id: gid, name: txt(p.ruta_publico) || gid, tramos: [], color: "#444" });
     const g = groups.get(gid); t.g = g; g.tramos.push(t);
     t.layer = L.geoJSON(f, { style: () => ({ color: "#444", weight: 4 }) });
-    t.layer.on("click", () => { selectGroup(g.id, t.id); });
-    t.layer.bindTooltip(g.name, { sticky: true });
+    t.km = t.layer.getLayers().reduce((s, l) => s + lengthM(l.getLatLngs ? l.getLatLngs() : []), 0) / 1000;
+    t.layer.on("click", () => selectGroup(g.id, t.id));
     t.layer.addTo(lineLayer);
   }
   state.groups = [...groups.values()].sort((a, b) => a.id.localeCompare(b.id, "es", { numeric: true }));
-  state.groups.forEach(g => {
+  for (const g of state.groups) {
     const n = parseInt(String(g.id).replace(/\D/g, ""), 10);
     g.color = COLORS[((isNaN(n) ? 1 : n) - 1) % COLORS.length];
     g.tramos.sort((a, b) => a.id - b.id);
+    labelTramos(g);
+    for (const t of g.tramos) t.layer.bindTooltip(`${g.name}${t.kind ? " · " + t.kind : ""}`, { sticky: true });
     state.byId.set(g.id, g);
-  });
+  }
   const sel = $("#f-par-ruta");
   state.groups.forEach(g => sel.insertAdjacentHTML("beforeend", `<option value="${esc(g.id)}">${esc(g.id)} · ${esc(g.name)}</option>`));
+}
+
+/* Ida / Vuelta / Variante */
+function dirText(t) { const p = t.p; return txt(p.sentido_texto) || `${txt(p.origen)} → ${txt(p.destino)}`; }
+function labelTramos(g) {
+  const ts = g.tramos;
+  for (const t of ts) t.label = dirText(t);
+  if (ts.length === 1) {
+    const t = ts[0], circ = fold(t.p.origen) && fold(t.p.origen) === fold(t.p.destino);
+    t.kind = circ ? "Circuito" : ""; return;
+  }
+  const first = fold(g.name.split(/\s+-\s+/)[0]);
+  const base = ts.find(t => fold(t.p.origen) === first) || ts[0];
+  const rest = ts.filter(t => t !== base);
+  const inverse = t => fold(t.p.origen) === fold(base.p.destino) && fold(t.p.destino) === fold(base.p.origen);
+  if (rest.every(inverse) && rest.length === 1) {
+    base.kind = "Ida"; rest[0].kind = "Vuelta";
+    g.tramos = [base, rest[0]];
+  } else {
+    ts.forEach((t, i) => { t.kind = `Variante ${i + 1}`; if (t.km) t.label += ` · ${t.km.toLocaleString("es-CO", { maximumFractionDigits: 1, minimumFractionDigits: 1 })} km`; });
+  }
 }
 
 function buildStops(features) {
@@ -225,7 +285,7 @@ function buildStops(features) {
     s.marker.on("click", () => { state.selPar = s; renderParList(); updateMarkers(); });
     state.par.push(s);
   }
-  state.par.sort((a, b) => a.name.localeCompare(b.name, "es"));
+  state.par.sort((a, b) => byName(a.name, b.name));
 }
 
 /* ---------- Estilos ---------- */
@@ -235,10 +295,33 @@ function styleLines() {
   for (const g of state.groups) for (const t of g.tramos) {
     let st;
     if (!sel) st = { color: g.color, weight: 4, opacity: .85, dashArray: null };
-    else if (g === sel) st = t.id === state.selT ? { color: g.color, weight: 8, opacity: 1, dashArray: null } : { color: g.color, weight: 4, opacity: .75, dashArray: "8 8" };
+    else if (g === sel) st = t.id === state.selT ? { color: g.color, weight: 8, opacity: 1, dashArray: null } : { color: g.color, weight: 4, opacity: .7, dashArray: "8 8" };
     else st = { color: "#8a9199", weight: 3, opacity: .35, dashArray: null };
     t.layer.setStyle(st);
     if (sel && g === sel && t.id === state.selT) t.layer.bringToFront();
+  }
+  drawArrows();
+}
+function drawArrows() {
+  arrowLayer.clearLayers();
+  const g = state.sel && state.byId.get(state.sel); if (!g) return;
+  const t = g.tramos.find(x => x.id === state.selT); if (!t) return;
+  for (const l of t.layer.getLayers()) for (const line of lines(l.getLatLngs ? l.getLatLngs() : [])) {
+    const total = lengthM(line); if (total < 50) continue;
+    const step = Math.max(250, total / 18);
+    let acc = 0, next = step / 2;
+    for (let i = 1; i < line.length; i++) {
+      const a = line[i - 1], b = line[i], d = a.distanceTo(b);
+      while (acc + d >= next && d > 0) {
+        const k = (next - acc) / d, lat = a.lat + (b.lat - a.lat) * k, lng = a.lng + (b.lng - a.lng) * k;
+        const dy = b.lat - a.lat, dx = (b.lng - a.lng) * Math.cos(a.lat * Math.PI / 180);
+        const ang = Math.atan2(dx, dy) * 180 / Math.PI;
+        arrowLayer.addLayer(L.marker([lat, lng], { interactive: false, keyboard: false, icon: L.divIcon({ className: "arrow", iconSize: [16, 16], iconAnchor: [8, 8],
+          html: `<svg width="16" height="16" viewBox="0 0 14 14" style="transform:rotate(${ang}deg)"><path d="M7 1 L12 12 L7 9 L2 12 Z" fill="#fff" stroke="#111" stroke-width="1.2"/></svg>` }) }));
+        next += step;
+      }
+      acc += d;
+    }
   }
 }
 function visibleStop(s) {
@@ -270,11 +353,25 @@ function stopPopup(s) {
     const g = state.byId.get(k);
     const b = document.createElement("button"); b.className = "chip"; b.type = "button";
     b.textContent = g ? `${k} · ${g.name}` : k;
-    if (g) b.addEventListener("click", () => { map.closePopup(); goRuta(k); });
+    if (g) b.addEventListener("click", () => { map.closePopup(); selectGroup(k); });
     c.appendChild(b);
   });
   return d;
 }
+
+/* ---------- Panel plegable ---------- */
+const appEl = $("#app");
+const TG = L.Control.extend({
+  options: { position: "topleft" },
+  onAdd() {
+    const b = L.DomUtil.create("button", "tg"); b.type = "button";
+    const sync = () => { const c = appEl.classList.contains("collapsed"); b.textContent = c ? "☰ Mostrar rutas" : "◀ Ocultar panel"; b.setAttribute("aria-expanded", String(!c)); };
+    b.addEventListener("click", () => { appEl.classList.toggle("collapsed"); sync(); setTimeout(() => map.invalidateSize(), 260); });
+    L.DomEvent.disableClickPropagation(b); sync(); this._sync = sync; return b;
+  }
+});
+const tgCtl = new TG(); map.addControl(tgCtl);
+function expandPanel() { if (appEl.classList.contains("collapsed")) { appEl.classList.remove("collapsed"); tgCtl._sync(); setTimeout(() => map.invalidateSize(), 260); } }
 
 /* ---------- Pestañas ---------- */
 function setTab(t) {
@@ -288,7 +385,6 @@ function setTab(t) {
 }
 $("#tab-btn-rutas").addEventListener("click", () => setTab("rutas"));
 $("#tab-btn-paraderos").addEventListener("click", () => setTab("paraderos"));
-function goRuta(id) { setTab("rutas"); selectGroup(id); }
 
 /* ---------- Lista de rutas ---------- */
 function groupText(g) {
@@ -298,14 +394,13 @@ function renderList() {
   const q = fold($("#q-rutas").value.trim());
   const rows = state.groups.filter(g => !q || groupText(g).includes(q));
   $("#rutas-count").textContent = rows.length === state.groups.length ? `${rows.length} rutas` : `${rows.length} de ${state.groups.length} rutas`;
-  const ul = $("#rutas-list");
-  ul.innerHTML = "";
+  const ul = $("#rutas-list"); ul.innerHTML = "";
   if (!rows.length) { ul.innerHTML = `<li class="empty">No encontramos rutas con ese texto. Prueba con otro barrio o calle.</li>`; return; }
   for (const g of rows) {
     const li = document.createElement("li");
-    const hasHor = g.tramos.some(t => txt(t.p.horario));
-    const sent = g.tramos.length > 1 ? `${g.tramos.length} sentidos` : "1 sentido";
-    li.innerHTML = `<button class="item" type="button"><span class="dot" style="background:${g.color}"></span><span><strong>${esc(g.name)}</strong><small>${esc(g.id)} · ${sent}${hasHor ? "" : " · horario por confirmar"}</small></span></button>`;
+    const nT = g.tramos.length;
+    const sent = nT > 1 ? (g.tramos[0].kind === "Ida" ? "Ida y vuelta" : `${nT} variantes`) : (g.tramos[0].kind || "Un sentido");
+    li.innerHTML = `<button class="item" type="button"><span class="dot" style="background:${g.color}"></span><span><strong>${esc(g.name)}</strong><small>${esc(g.id)} · ${esc(sent)}</small></span><span class="go" aria-hidden="true">›</span></button>`;
     $("button", li).addEventListener("click", () => selectGroup(g.id));
     ul.appendChild(li);
   }
@@ -315,10 +410,13 @@ $("#q-rutas").addEventListener("input", renderList);
 /* ---------- Detalle ---------- */
 function selectGroup(id, tramoId) {
   const g = state.byId.get(id); if (!g) return;
-  setTab("rutas");
+  setTab("rutas"); expandPanel();
   state.sel = id;
   state.selT = (tramoId != null && g.tramos.some(t => t.id === tramoId)) ? tramoId : g.tramos[0].id;
-  renderDetail(); styleLines(); updateMarkers();
+  renderDetail(); styleLines(); updateMarkers(); fitSel();
+}
+function fitSel() {
+  const g = state.sel && state.byId.get(state.sel); if (!g) return;
   const b = L.featureGroup(g.tramos.map(t => t.layer)).getBounds();
   if (b.isValid()) map.fitBounds(b.pad(0.12));
 }
@@ -327,52 +425,67 @@ function clearSel() {
   $("#rutas-detail-view").hidden = true; $("#rutas-list-view").hidden = false;
   styleLines(); updateMarkers();
 }
-function kv(label, val, pending) {
-  return `<div class="${val ? "" : "pending"}"><span>${esc(label)}</span><b>${esc(val || "Por confirmar")}</b></div>`;
-}
 function renderDetail() {
   const g = state.byId.get(state.sel), t = g.tramos.find(x => x.id === state.selT) || g.tramos[0];
   state.selT = t.id;
   const p = t.p, el = $("#rutas-detail-view");
-  const dir = g.tramos.length > 1
-    ? `<h3>Sentido</h3><div class="chips" role="group" aria-label="Sentido del recorrido">${g.tramos.map(x => `<button type="button" class="chip" data-t="${x.id}" aria-pressed="${x.id === t.id}">${esc(txt(x.p.sentido_texto) || `${txt(x.p.origen)} → ${txt(x.p.destino)}`)}</button>`).join("")}</div>`
-    : "";
-  const fr = txt(p.frecuencia_min);
-  const franjas = (state.hor.get(t.id) || []);
-  const franjasHtml = franjas.length
-    ? `<h3>Franjas de servicio</h3><table><thead><tr><th>Días</th><th>Franja</th><th>Cada (min)</th></tr></thead><tbody>${franjas.map(r => `<tr><td>${esc(r.dias)}</td><td>${esc(r.franja)}</td><td>${esc(r.intervalo_min)}</td></tr>`).join("")}</tbody></table>`
-    : "";
+
+  const seg = g.tramos.length > 1
+    ? `<h3>Sentido</h3><div class="seg" role="group" aria-label="Sentido del recorrido">${g.tramos.map(x => `<button type="button" data-t="${x.id}" aria-pressed="${x.id === t.id}"><b>${esc(x.kind)}</b><span>${esc(x.label)}</span></button>`).join("")}</div>`
+    : `<p class="sub">${t.kind ? `<b>${esc(t.kind)}:</b> ` : ""}${esc(t.label)}</p>`;
+
   const rows = state.rb.get(t.id) || [];
-  const barrios = rows.filter(r => txt(r.tipo).toLowerCase() !== "referencia");
-  const refs = rows.filter(r => txt(r.tipo).toLowerCase() === "referencia").map(r => txt(r.barrio));
+  const isRef = r => txt(r.tipo).toLowerCase() === "referencia";
+  const barrios = rows.filter(r => !isRef(r));
+  const refs = rows.filter(isRef).map(r => txt(r.barrio));
   const byZ = new Map();
-  for (const r of barrios) { const z = txt(r.zona) ? `Zona ${txt(r.zona).replace(/^zona\s*/i, "")}` : "Sin zona"; if (!byZ.has(z)) byZ.set(z, []); byZ.get(z).push(txt(r.barrio)); }
+  for (const r of barrios) { const n = txt(r.zona).replace(/^zona\s*/i, ""); const z = n ? `Zona ${n}` : "Sin zona"; if (!byZ.has(z)) byZ.set(z, []); byZ.get(z).push(txt(r.barrio)); }
   const zonas = [...byZ.keys()].sort((a, b) => a.localeCompare(b, "es", { numeric: true }));
+  const nBar = barrios.length || Number(txt(p.n_barrios)) || 0;
   const barHtml = barrios.length
-    ? `<details><summary>Ver ${barrios.length} barrios y veredas</summary>${zonas.map(z => `<p><b>${esc(z)}:</b> ${esc(byZ.get(z).sort((a, b) => a.localeCompare(b, "es")).join(", "))}</p>`).join("")}</details>`
-    : (txt(p.barrios) ? `<details><summary>Ver barrios y veredas</summary><p>${esc(p.barrios)}</p></details>` : "");
+    ? zonas.map(z => `<h4>${esc(z)}</h4><div class="chips">${byZ.get(z).sort(byName).map(b => `<span class="chip">${esc(b)}</span>`).join("")}</div>`).join("")
+    : (txt(p.barrios) ? `<div class="chips">${split(p.barrios).map(b => `<span class="chip">${esc(b)}</span>`).join("")}</div>` : `<p class="sub">Por confirmar.</p>`);
   const refList = refs.length ? refs : split(p.referencias);
   const stops = state.par.filter(s => s.codes.includes(g.id));
+
+  const parts = scheduleParts(p.dias, p.horario);
+  const fr = txt(p.frecuencia_min);
+  const franjas = state.hor.get(t.id) || [];
+  const schedHtml = parts.length
+    ? parts.map(x => `<div class="sched"><span class="dchip">${esc(x.d)}</span><span class="tr">${esc(x.r)}</span></div>`).join("") + (fr ? `<p class="freq">Frecuencia: <b>cada ${esc(fr)} min</b></p>` : "")
+    : `<div class="pending">Horario por confirmar</div>`;
+  const slotHtml = franjas.length
+    ? `<h3>Frecuencia por franja</h3>${franjas.map(r => `<div class="slot"><span class="dchip">${esc(abbr(r.dias))}</span><span class="tr">${esc(range12(r.franja))}</span><span class="ev">cada ${esc(r.intervalo_min)} min</span></div>`).join("")}`
+    : "";
+
   el.innerHTML = `
-    <button class="btn" type="button" id="back">← Todas las rutas</button>
+    <div class="toolbar">
+      <button class="btn" type="button" id="back">← Todas las rutas</button>
+      <button class="btn" type="button" id="fit">⌖ Encuadrar</button>
+    </div>
     <h2 class="name"><span class="badge" style="background:${g.color}">${esc(g.id)}</span>${esc(g.name)}</h2>
-    <p class="sub">${esc(txt(p.sentido_texto) || `${txt(p.origen)} → ${txt(p.destino)}`)}</p>
-    ${dir}
-    <h3>Horario</h3>
-    <div class="kv">${kv("Días", txt(p.dias))}${kv("Horario", txt(p.horario))}${kv("Frecuencia", fr ? `cada ${fr} min` : "")}</div>
-    ${franjasHtml}
+    ${seg}
+    <div class="stats" style="margin-top:12px">
+      <div><span>Distancia</span><b>${t.km ? t.km.toLocaleString("es-CO", { maximumFractionDigits: 1, minimumFractionDigits: 1 }) + " km" : "—"}</b></div>
+      <div><span>Barrios</span><b>${nBar || "—"}</b></div>
+      <div><span>Paraderos</span><b>${stops.length}</b></div>
+    </div>
+    <h3>Horario de funcionamiento</h3>
+    ${schedHtml}
+    ${slotHtml}
     <h3>Por dónde pasa</h3>
     <p style="margin:0"><b>Vías principales:</b> ${txt(p.calles_principales) ? esc(p.calles_principales) : `<span class="chip">Por confirmar</span>`}</p>
     ${txt(p.recorrido) ? `<p style="margin:6px 0 0"><b>Recorrido:</b> ${esc(p.recorrido)}</p>` : ""}
-    ${zonas.length ? `<h3>Zonas que recorre</h3><div class="chips">${zonas.filter(z => z !== "Sin zona").map(z => `<span class="chip">${esc(z)}</span>`).join("")}</div>` : (txt(p.zonas) ? `<h3>Zonas que recorre</h3><div class="chips">${split(p.zonas).map(z => `<span class="chip">Zona ${esc(z)}</span>`).join("")}</div>` : "")}
+    <h3>Barrios y veredas${nBar ? ` (${nBar})` : ""}</h3>
     ${barHtml}
     ${refList.length ? `<h3>Puntos de referencia</h3><div class="chips">${refList.map(r => `<span class="chip">${esc(r)}</span>`).join("")}</div>` : ""}
     <h3>Paraderos de esta ruta</h3>
-    ${stops.length ? stops.map((s, i) => `<button type="button" class="stoplink" data-s="${state.par.indexOf(s)}">📍 ${esc(s.name)}</button>`).join("") : `<p class="sub">Aún no hay paraderos asignados a esta ruta.</p>`}
+    ${stops.length ? stops.map(s => `<button type="button" class="stoplink" data-s="${state.par.indexOf(s)}">📍 ${esc(s.name)}</button>`).join("") : `<p class="sub">Aún no hay paraderos asignados a esta ruta.</p>`}
   `;
   $("#rutas-list-view").hidden = true; el.hidden = false;
   $("#back", el).addEventListener("click", clearSel);
-  el.querySelectorAll("[data-t]").forEach(b => b.addEventListener("click", () => { state.selT = Number(b.dataset.t); renderDetail(); styleLines(); }));
+  $("#fit", el).addEventListener("click", fitSel);
+  el.querySelectorAll("[data-t]").forEach(b => b.addEventListener("click", () => { state.selT = Number(b.dataset.t); renderDetail(); styleLines(); fitSel(); }));
   el.querySelectorAll("[data-s]").forEach(b => b.addEventListener("click", () => focusStop(state.par[Number(b.dataset.s)])));
   $("#panel").scrollTop = 0;
 }
@@ -391,7 +504,7 @@ function renderParList() {
     const chips = s.codes.length ? s.codes.map(k => `<button type="button" class="chip" data-r="${esc(k)}" title="Ver ruta ${esc(k)}">${esc(k)}</button>`).join("") : `<span class="chip">Rutas por confirmar</span>`;
     li.innerHTML = `<div class="item" style="cursor:default;flex-direction:column;align-items:stretch;gap:6px"><button type="button" class="stoplink" style="border:0;padding:0;font-weight:650">📍 ${esc(s.name)}</button><div class="chips" style="margin:0">${chips}</div></div>`;
     $(".stoplink", li).addEventListener("click", () => focusStop(s));
-    li.querySelectorAll("[data-r]").forEach(b => b.addEventListener("click", () => goRuta(b.dataset.r)));
+    li.querySelectorAll("[data-r]").forEach(b => b.addEventListener("click", () => selectGroup(b.dataset.r)));
     ul.appendChild(li);
   }
 }
@@ -400,7 +513,6 @@ function focusStop(s) {
   if (!s.shown) { parLayer.addLayer(s.marker); s.shown = true; }
   map.setView(s.ll, Math.max(map.getZoom(), 17));
   s.marker.openPopup();
-  if (window.matchMedia("(max-width:820px)").matches) window.scrollTo(0, 0);
 }
 $("#q-par").addEventListener("input", () => { renderParList(); updateMarkers(); });
 $("#f-par-ruta").addEventListener("change", () => { renderParList(); updateMarkers(); });
@@ -412,8 +524,8 @@ legend.onAdd = () => {
   const open = window.matchMedia("(min-width:821px)").matches ? " open" : "";
   d.innerHTML = `<details${open}><summary>Convenciones</summary>
     <div class="li"><span class="sw" style="border-color:#1b6ca8"></span>Ruta (cada color es una ruta)</div>
-    <div class="li"><span class="sw" style="border-color:#1b6ca8;border-top-width:8px"></span>Ruta y sentido elegidos</div>
-    <div class="li"><span class="sw" style="border-color:#1b6ca8;border-top-style:dashed"></span>Sentido contrario</div>
+    <div class="li"><span class="sw" style="border-color:#1b6ca8;border-top-width:8px"></span>Ruta y sentido elegidos (las flechas indican el sentido)</div>
+    <div class="li"><span class="sw" style="border-color:#1b6ca8;border-top-style:dashed"></span>Otro sentido o variante</div>
     <div class="li"><span class="sw" style="border-color:#8a9199;opacity:.6"></span>Otras rutas</div>
     <div class="li"><span class="pt"></span>Paradero</div>
     <label><input type="checkbox" id="tg-bar"> Mostrar barrios y veredas</label></details>`;
@@ -429,7 +541,7 @@ document.addEventListener("change", async e => {
     try {
       const j = await query(LAYER.barrios, true);
       const nameKey = f => { const ks = Object.keys(f.properties || {}); return ks.find(k => /^(barrio|nombre|name|vereda|nom_)/i.test(k)) || ks.find(k => /barrio|nombre|vereda/i.test(k)); };
-      barLayer = L.geoJSON(j, { style: () => ({ color: "#6b7785", weight: 1, fillOpacity: .04, dashArray: "3 3" }), interactive: true,
+      barLayer = L.geoJSON(j, { style: () => ({ color: "#6b7785", weight: 1, fillOpacity: .04, dashArray: "3 3" }),
         onEachFeature: (f, l) => { const k = nameKey(f); if (k && txt(f.properties[k])) l.bindTooltip(String(f.properties[k]), { sticky: true }); } });
     } catch (err) { $("#msg").innerHTML = `<div class="err">No se pudieron cargar los barrios (${esc(err.message)}).</div>`; e.target.checked = false; }
     barLoading = false;
