@@ -1,0 +1,440 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rutas de Transporte · Madrid, Cundinamarca</title>
+<meta name="description" content="Consulta las rutas de transporte público de Madrid, Cundinamarca: recorrido, horarios, barrios y paraderos.">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<style>
+:root{
+  --bg:#f5f6f8; --panel:#ffffff; --ink:#1c2430; --muted:#5d6877; --line:#dde1e7;
+  --brand:#0b5a8f; --brand-ink:#ffffff; --soft:#eaf2f8; --warn-bg:#fff6df; --warn-ink:#7a5a00;
+  --shadow:0 1px 3px rgba(20,30,50,.12);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#12171d; --panel:#1a212a; --ink:#e8ecf1; --muted:#9aa6b4; --line:#2c3643;
+    --brand:#5db0e6; --brand-ink:#0d1722; --soft:#202c39; --warn-bg:#3a3017; --warn-ink:#f1d27a;
+    --shadow:0 1px 3px rgba(0,0,0,.5);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#12171d; --panel:#1a212a; --ink:#e8ecf1; --muted:#9aa6b4; --line:#2c3643;
+  --brand:#5db0e6; --brand-ink:#0d1722; --soft:#202c39; --warn-bg:#3a3017; --warn-ink:#f1d27a;
+  --shadow:0 1px 3px rgba(0,0,0,.5);
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--ink);display:flex;flex-direction:column;height:100dvh}
+header.top{background:var(--panel);border-bottom:1px solid var(--line);padding:10px 16px 0;flex:none}
+header.top h1{font-size:17px;margin:0 0 2px;font-weight:650}
+header.top p{margin:0 0 8px;color:var(--muted);font-size:13px}
+.tabs{display:flex;gap:4px}
+.tabs button{appearance:none;border:0;background:none;color:var(--muted);font:inherit;font-weight:600;padding:9px 14px;border-bottom:3px solid transparent;cursor:pointer}
+.tabs button[aria-selected="true"]{color:var(--brand);border-bottom-color:var(--brand)}
+.tabs button:focus-visible,.btn:focus-visible,.item:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+.app{flex:1;min-height:0;display:grid;grid-template-columns:400px 1fr}
+#panel{background:var(--panel);overflow:auto;border-right:1px solid var(--line);padding:14px 16px 24px}
+#map{min-height:0;background:#dfe6ea}
+@media (max-width:820px){
+  .app{display:flex;flex-direction:column}
+  #map{order:1;height:42dvh;flex:none}
+  #panel{order:2;flex:1;border-right:0;border-top:1px solid var(--line)}
+}
+label.lbl{display:block;font-size:12px;font-weight:600;color:var(--muted);margin:0 0 4px}
+input[type=search],select{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);font:inherit}
+.row{display:flex;gap:8px;margin-bottom:10px}
+.row>*{flex:1}
+ul.list{list-style:none;margin:10px 0 0;padding:0;display:flex;flex-direction:column;gap:8px}
+.item{width:100%;text-align:left;display:flex;gap:12px;align-items:center;padding:11px 12px;border:1px solid var(--line);border-radius:10px;background:var(--panel);color:var(--ink);font:inherit;cursor:pointer}
+.item:hover{background:var(--soft)}
+.item .dot{width:12px;height:34px;border-radius:6px;flex:none}
+.item strong{display:block;font-weight:650}
+.item small{color:var(--muted)}
+.count{color:var(--muted);font-size:13px;margin:8px 0 0}
+.btn{appearance:none;border:1px solid var(--line);background:var(--panel);color:var(--ink);padding:7px 12px;border-radius:8px;font:inherit;font-weight:600;cursor:pointer}
+.btn.primary{background:var(--brand);border-color:var(--brand);color:var(--brand-ink)}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 0}
+.chip{display:inline-block;padding:3px 9px;border-radius:999px;background:var(--soft);font-size:12.5px;border:1px solid var(--line);color:var(--ink)}
+button.chip{cursor:pointer;font:inherit;font-size:12.5px}
+button.chip[aria-pressed="true"]{background:var(--brand);color:var(--brand-ink);border-color:var(--brand)}
+.badge{display:inline-block;font-weight:700;font-size:12px;padding:2px 8px;border-radius:6px;color:#fff;margin-right:6px;vertical-align:middle}
+h2.name{font-size:19px;margin:10px 0 2px;line-height:1.25}
+.sub{color:var(--muted);margin:0 0 6px}
+h3{font-size:13px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin:18px 0 6px}
+.kv{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.kv div{background:var(--soft);border-radius:10px;padding:8px 10px}
+.kv span{display:block;font-size:11.5px;color:var(--muted);font-weight:600}
+.kv b{font-weight:650;font-size:14px}
+.pending{color:var(--warn-ink);background:var(--warn-bg)!important}
+.note{background:var(--warn-bg);color:var(--warn-ink);padding:8px 10px;border-radius:8px;font-size:13px;margin-top:8px}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th,td{text-align:left;padding:6px 6px;border-bottom:1px solid var(--line)}
+th{color:var(--muted);font-size:12px}
+details{border:1px solid var(--line);border-radius:8px;padding:6px 10px;margin-top:6px}
+details summary{cursor:pointer;font-weight:600}
+details p{margin:6px 0 2px;font-size:13.5px}
+.stoplink{display:block;width:100%;text-align:left;background:none;border:0;border-bottom:1px solid var(--line);padding:8px 2px;color:var(--ink);font:inherit;cursor:pointer}
+.stoplink:hover{background:var(--soft)}
+.empty,.err{padding:14px;border-radius:10px;background:var(--soft);color:var(--muted);margin-top:12px}
+.err{background:var(--warn-bg);color:var(--warn-ink)}
+.foot{margin-top:22px;font-size:12px;color:var(--muted);border-top:1px solid var(--line);padding-top:10px}
+.legend{background:var(--panel);color:var(--ink);padding:8px 10px;border-radius:10px;box-shadow:var(--shadow);font-size:12.5px;max-width:230px}
+.legend summary{font-weight:700;border:0;padding:0}
+.legend details{border:0;padding:0;margin:0}
+.legend .li{display:flex;align-items:center;gap:8px;margin-top:6px}
+.legend .sw{width:26px;height:0;border-top:4px solid;flex:none}
+.legend .pt{width:12px;height:12px;border-radius:50%;border:2px solid #0b3b66;background:#fff;flex:none;margin:0 7px}
+.legend label{display:flex;gap:6px;align-items:center;margin-top:8px;cursor:pointer}
+.leaflet-container{font:inherit}
+</style>
+</head>
+<body>
+<header class="top">
+  <h1>Rutas de transporte público · Madrid, Cundinamarca</h1>
+  <p>Consulta el recorrido, los horarios y los paraderos de cada ruta.</p>
+  <nav class="tabs" role="tablist" aria-label="Secciones">
+    <button role="tab" id="tab-btn-rutas" aria-selected="true" aria-controls="view-rutas">Encuentra tu ruta</button>
+    <button role="tab" id="tab-btn-paraderos" aria-selected="false" aria-controls="view-paraderos">Paraderos</button>
+  </nav>
+</header>
+
+<div class="app">
+  <section id="panel" aria-live="polite">
+    <div id="view-rutas" role="tabpanel" aria-labelledby="tab-btn-rutas">
+      <div id="rutas-list-view">
+        <label class="lbl" for="q-rutas">Buscar ruta, barrio, calle o destino</label>
+        <input type="search" id="q-rutas" placeholder="Ej.: Prodesa, Calle 7, Casa Blanca…" autocomplete="off">
+        <p class="count" id="rutas-count"></p>
+        <ul class="list" id="rutas-list"></ul>
+      </div>
+      <div id="rutas-detail-view" hidden></div>
+    </div>
+    <div id="view-paraderos" role="tabpanel" aria-labelledby="tab-btn-paraderos" hidden>
+      <label class="lbl" for="q-par">Buscar paradero</label>
+      <input type="search" id="q-par" placeholder="Ej.: Parque del Reloj" autocomplete="off">
+      <div style="height:10px"></div>
+      <label class="lbl" for="f-par-ruta">Filtrar por ruta</label>
+      <select id="f-par-ruta"><option value="">Todas las rutas</option></select>
+      <p class="count" id="par-count"></p>
+      <ul class="list" id="par-list"></ul>
+    </div>
+    <div id="msg"></div>
+    <p class="foot">Información de referencia. Los horarios y frecuencias están sujetos a confirmación con el operador del servicio. Observatorio Interinstitucional de Madrid (OIM) · Alcaldía Municipal de Madrid.</p>
+  </section>
+  <div id="map" role="application" aria-label="Mapa de rutas y paraderos"></div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+(() => {
+"use strict";
+const BASE = "https://services3.arcgis.com/Ft57LzxI6jxOJMRp/arcgis/rest/services/Rutas_de_Transporte_en_Madrid_vista/FeatureServer";
+const LAYER = { paraderos: 0, rutas: 1, barrios: 2 }, TABLE = { horarios: 3, rutaBarrio: 4 };
+const COLORS = ["#1b6ca8","#e07a1f","#2a9d5c","#c0392b","#7d5ba6","#8c564b","#d6459b","#5f6b73","#b08f00","#17a2b8","#4a7c2f","#d35400"];
+
+const $ = (s, r = document) => r.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+const fold = s => String(s ?? "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+const lc = o => { const r = {}; for (const k in (o || {})) r[k.toLowerCase()] = o[k]; return r; };
+const txt = v => (v == null || String(v).trim() === "" || String(v).trim() === "<Null>") ? "" : String(v).trim();
+const split = s => txt(s).split(",").map(x => x.trim()).filter(Boolean);
+const codeOf = s => { const m = String(s || "").toUpperCase().match(/R\s?\d+/g) || []; return [...new Set(m.map(x => "R" + String(parseInt(x.replace(/\D/g, ""), 10)).padStart(2, "0")))]; };
+
+const state = { tab: "rutas", groups: [], byId: new Map(), sel: null, selT: null, par: [], selPar: null, hor: new Map(), rb: new Map(), loaded: false };
+
+/* ---------- Mapa ---------- */
+const map = L.map("map").setView([4.73, -74.26], 13);
+L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}", {
+  attribution: "Tiles © Esri", maxZoom: 19
+}).addTo(map);
+const lineLayer = L.layerGroup().addTo(map);
+const parLayer = L.layerGroup().addTo(map);
+let barLayer = null, barLoading = false;
+
+/* ---------- Datos ---------- */
+async function query(id, geo) {
+  const p = new URLSearchParams({ where: "1=1", outFields: "*", f: geo ? "geojson" : "json", returnGeometry: geo ? "true" : "false", outSR: "4326" });
+  const r = await fetch(`${BASE}/${id}/query?${p}`);
+  if (!r.ok) throw new Error("HTTP " + r.status);
+  const j = await r.json();
+  if (j.error) throw new Error(j.error.message || "Error del servicio");
+  return j;
+}
+
+async function init() {
+  try {
+    const [par, rut, hor, rb] = await Promise.all([
+      query(LAYER.paraderos, true), query(LAYER.rutas, true), query(TABLE.horarios, false), query(TABLE.rutaBarrio, false)
+    ]);
+    for (const f of hor.features) { const a = lc(f.attributes); const k = Number(a.id_tramo); if (!state.hor.has(k)) state.hor.set(k, []); state.hor.get(k).push(a); }
+    for (const f of rb.features) { const a = lc(f.attributes); const k = Number(a.id_tramo); if (!state.rb.has(k)) state.rb.set(k, []); state.rb.get(k).push(a); }
+    buildRoutes(rut.features);
+    buildStops(par.features);
+    state.loaded = true;
+    renderList(); renderParList(); updateMarkers(); styleLines();
+    const b = lineLayer.getLayers().length ? L.featureGroup(lineLayer.getLayers()).getBounds() : null;
+    if (b && b.isValid()) map.fitBounds(b.pad(0.08));
+  } catch (e) {
+    console.error(e);
+    $("#msg").innerHTML = `<div class="err">No se pudo cargar la información de las rutas (${esc(e.message)}). Revisa tu conexión y recarga la página.</div>`;
+  }
+}
+
+function buildRoutes(features) {
+  const groups = new Map();
+  for (const f of features) {
+    const p = lc(f.properties);
+    const t = { id: Number(p.id_tramo), p, g: null, layer: null };
+    const gid = txt(p.id_ruta) || ("T" + t.id);
+    if (!groups.has(gid)) groups.set(gid, { id: gid, name: txt(p.ruta_publico) || gid, tramos: [], color: "#444" });
+    const g = groups.get(gid); t.g = g; g.tramos.push(t);
+    t.layer = L.geoJSON(f, { style: () => ({ color: "#444", weight: 4 }) });
+    t.layer.on("click", () => { selectGroup(g.id, t.id); });
+    t.layer.bindTooltip(g.name, { sticky: true });
+    t.layer.addTo(lineLayer);
+  }
+  state.groups = [...groups.values()].sort((a, b) => a.id.localeCompare(b.id, "es", { numeric: true }));
+  state.groups.forEach(g => {
+    const n = parseInt(String(g.id).replace(/\D/g, ""), 10);
+    g.color = COLORS[((isNaN(n) ? 1 : n) - 1) % COLORS.length];
+    g.tramos.sort((a, b) => a.id - b.id);
+    state.byId.set(g.id, g);
+  });
+  const sel = $("#f-par-ruta");
+  state.groups.forEach(g => sel.insertAdjacentHTML("beforeend", `<option value="${esc(g.id)}">${esc(g.id)} · ${esc(g.name)}</option>`));
+}
+
+function buildStops(features) {
+  for (const f of features) {
+    if (!f.geometry || !f.geometry.coordinates) continue;
+    const p = lc(f.properties);
+    const [lng, lat] = f.geometry.coordinates;
+    const s = { name: txt(p.nombre) || "Paradero", codes: codeOf(p.rutas), ll: L.latLng(lat, lng), marker: null, shown: false };
+    s.marker = L.circleMarker(s.ll, baseStop());
+    s.marker.bindTooltip(s.name);
+    s.marker.bindPopup(() => stopPopup(s));
+    s.marker.on("click", () => { state.selPar = s; renderParList(); updateMarkers(); });
+    state.par.push(s);
+  }
+  state.par.sort((a, b) => a.name.localeCompare(b.name, "es"));
+}
+
+/* ---------- Estilos ---------- */
+const baseStop = () => ({ radius: 7, color: "#0b3b66", weight: 2, fillColor: "#ffffff", fillOpacity: 1, opacity: 1 });
+function styleLines() {
+  const sel = state.sel && state.byId.get(state.sel);
+  for (const g of state.groups) for (const t of g.tramos) {
+    let st;
+    if (!sel) st = { color: g.color, weight: 4, opacity: .85, dashArray: null };
+    else if (g === sel) st = t.id === state.selT ? { color: g.color, weight: 8, opacity: 1, dashArray: null } : { color: g.color, weight: 4, opacity: .75, dashArray: "8 8" };
+    else st = { color: "#8a9199", weight: 3, opacity: .35, dashArray: null };
+    t.layer.setStyle(st);
+    if (sel && g === sel && t.id === state.selT) t.layer.bringToFront();
+  }
+}
+function visibleStop(s) {
+  if (state.tab !== "paraderos") return true;
+  const q = fold($("#q-par").value), f = $("#f-par-ruta").value;
+  return (!q || fold(s.name).includes(q)) && (!f || s.codes.includes(f));
+}
+function updateMarkers() {
+  const sel = state.sel && state.byId.get(state.sel);
+  for (const s of state.par) {
+    const vis = visibleStop(s);
+    if (vis && !s.shown) { parLayer.addLayer(s.marker); s.shown = true; }
+    if (!vis && s.shown) { parLayer.removeLayer(s.marker); s.shown = false; }
+    let st = baseStop();
+    if (state.tab === "rutas" && sel) {
+      if (s.codes.includes(sel.id)) st = { ...st, fillColor: sel.color, radius: 8 };
+      else st = { ...st, radius: 5, opacity: .5, fillOpacity: .5 };
+    }
+    if (state.selPar === s) st = { ...st, radius: 10, fillColor: "#ffd400", weight: 3 };
+    s.marker.setStyle(st);
+  }
+}
+function stopPopup(s) {
+  const d = document.createElement("div");
+  d.innerHTML = `<strong>${esc(s.name)}</strong><div class="chips" style="margin-top:6px"></div>`;
+  const c = $(".chips", d);
+  if (!s.codes.length) c.insertAdjacentHTML("beforeend", `<span class="chip">Rutas por confirmar</span>`);
+  s.codes.forEach(k => {
+    const g = state.byId.get(k);
+    const b = document.createElement("button"); b.className = "chip"; b.type = "button";
+    b.textContent = g ? `${k} · ${g.name}` : k;
+    if (g) b.addEventListener("click", () => { map.closePopup(); goRuta(k); });
+    c.appendChild(b);
+  });
+  return d;
+}
+
+/* ---------- Pestañas ---------- */
+function setTab(t) {
+  state.tab = t;
+  for (const k of ["rutas", "paraderos"]) {
+    $("#tab-btn-" + k).setAttribute("aria-selected", String(k === t));
+    $("#view-" + k).hidden = k !== t;
+  }
+  updateMarkers();
+  setTimeout(() => map.invalidateSize(), 50);
+}
+$("#tab-btn-rutas").addEventListener("click", () => setTab("rutas"));
+$("#tab-btn-paraderos").addEventListener("click", () => setTab("paraderos"));
+function goRuta(id) { setTab("rutas"); selectGroup(id); }
+
+/* ---------- Lista de rutas ---------- */
+function groupText(g) {
+  return fold([g.name, g.id, ...g.tramos.flatMap(t => [t.p.origen, t.p.destino, t.p.calles_principales, t.p.barrios, t.p.recorrido, t.p.referencias])].join(" "));
+}
+function renderList() {
+  const q = fold($("#q-rutas").value.trim());
+  const rows = state.groups.filter(g => !q || groupText(g).includes(q));
+  $("#rutas-count").textContent = rows.length === state.groups.length ? `${rows.length} rutas` : `${rows.length} de ${state.groups.length} rutas`;
+  const ul = $("#rutas-list");
+  ul.innerHTML = "";
+  if (!rows.length) { ul.innerHTML = `<li class="empty">No encontramos rutas con ese texto. Prueba con otro barrio o calle.</li>`; return; }
+  for (const g of rows) {
+    const li = document.createElement("li");
+    const hasHor = g.tramos.some(t => txt(t.p.horario));
+    const sent = g.tramos.length > 1 ? `${g.tramos.length} sentidos` : "1 sentido";
+    li.innerHTML = `<button class="item" type="button"><span class="dot" style="background:${g.color}"></span><span><strong>${esc(g.name)}</strong><small>${esc(g.id)} · ${sent}${hasHor ? "" : " · horario por confirmar"}</small></span></button>`;
+    $("button", li).addEventListener("click", () => selectGroup(g.id));
+    ul.appendChild(li);
+  }
+}
+$("#q-rutas").addEventListener("input", renderList);
+
+/* ---------- Detalle ---------- */
+function selectGroup(id, tramoId) {
+  const g = state.byId.get(id); if (!g) return;
+  setTab("rutas");
+  state.sel = id;
+  state.selT = (tramoId != null && g.tramos.some(t => t.id === tramoId)) ? tramoId : g.tramos[0].id;
+  renderDetail(); styleLines(); updateMarkers();
+  const b = L.featureGroup(g.tramos.map(t => t.layer)).getBounds();
+  if (b.isValid()) map.fitBounds(b.pad(0.12));
+}
+function clearSel() {
+  state.sel = null; state.selT = null;
+  $("#rutas-detail-view").hidden = true; $("#rutas-list-view").hidden = false;
+  styleLines(); updateMarkers();
+}
+function kv(label, val, pending) {
+  return `<div class="${val ? "" : "pending"}"><span>${esc(label)}</span><b>${esc(val || "Por confirmar")}</b></div>`;
+}
+function renderDetail() {
+  const g = state.byId.get(state.sel), t = g.tramos.find(x => x.id === state.selT) || g.tramos[0];
+  state.selT = t.id;
+  const p = t.p, el = $("#rutas-detail-view");
+  const dir = g.tramos.length > 1
+    ? `<h3>Sentido</h3><div class="chips" role="group" aria-label="Sentido del recorrido">${g.tramos.map(x => `<button type="button" class="chip" data-t="${x.id}" aria-pressed="${x.id === t.id}">${esc(txt(x.p.sentido_texto) || `${txt(x.p.origen)} → ${txt(x.p.destino)}`)}</button>`).join("")}</div>`
+    : "";
+  const fr = txt(p.frecuencia_min);
+  const franjas = (state.hor.get(t.id) || []);
+  const franjasHtml = franjas.length
+    ? `<h3>Franjas de servicio</h3><table><thead><tr><th>Días</th><th>Franja</th><th>Cada (min)</th></tr></thead><tbody>${franjas.map(r => `<tr><td>${esc(r.dias)}</td><td>${esc(r.franja)}</td><td>${esc(r.intervalo_min)}</td></tr>`).join("")}</tbody></table>`
+    : "";
+  const obs = txt(p.observacion);
+  const rows = state.rb.get(t.id) || [];
+  const barrios = rows.filter(r => txt(r.tipo).toLowerCase() !== "referencia");
+  const refs = rows.filter(r => txt(r.tipo).toLowerCase() === "referencia").map(r => txt(r.barrio));
+  const byZ = new Map();
+  for (const r of barrios) { const z = txt(r.zona) ? `Zona ${txt(r.zona).replace(/^zona\s*/i, "")}` : "Sin zona"; if (!byZ.has(z)) byZ.set(z, []); byZ.get(z).push(txt(r.barrio)); }
+  const zonas = [...byZ.keys()].sort((a, b) => a.localeCompare(b, "es", { numeric: true }));
+  const barHtml = barrios.length
+    ? `<details><summary>Ver ${barrios.length} barrios y veredas</summary>${zonas.map(z => `<p><b>${esc(z)}:</b> ${esc(byZ.get(z).sort((a, b) => a.localeCompare(b, "es")).join(", "))}</p>`).join("")}</details>`
+    : (txt(p.barrios) ? `<details><summary>Ver barrios y veredas</summary><p>${esc(p.barrios)}</p></details>` : "");
+  const refList = refs.length ? refs : split(p.referencias);
+  const stops = state.par.filter(s => s.codes.includes(g.id));
+  el.innerHTML = `
+    <button class="btn" type="button" id="back">← Todas las rutas</button>
+    <h2 class="name"><span class="badge" style="background:${g.color}">${esc(g.id)}</span>${esc(g.name)}</h2>
+    <p class="sub">${esc(txt(p.sentido_texto) || `${txt(p.origen)} → ${txt(p.destino)}`)}</p>
+    ${dir}
+    <h3>Horario</h3>
+    <div class="kv">${kv("Días", txt(p.dias))}${kv("Horario", txt(p.horario))}${kv("Frecuencia", fr ? `cada ${fr} min` : "")}</div>
+    ${obs ? `<div class="note">${esc(obs)}</div>` : ""}
+    ${franjasHtml}
+    <h3>Por dónde pasa</h3>
+    <p style="margin:0"><b>Vías principales:</b> ${txt(p.calles_principales) ? esc(p.calles_principales) : `<span class="chip">Por confirmar</span>`}</p>
+    ${txt(p.recorrido) ? `<p style="margin:6px 0 0"><b>Recorrido:</b> ${esc(p.recorrido)}</p>` : ""}
+    ${zonas.length ? `<h3>Zonas que recorre</h3><div class="chips">${zonas.filter(z => z !== "Sin zona").map(z => `<span class="chip">${esc(z)}</span>`).join("")}</div>` : (txt(p.zonas) ? `<h3>Zonas que recorre</h3><div class="chips">${split(p.zonas).map(z => `<span class="chip">Zona ${esc(z)}</span>`).join("")}</div>` : "")}
+    ${barHtml}
+    ${refList.length ? `<h3>Puntos de referencia</h3><div class="chips">${refList.map(r => `<span class="chip">${esc(r)}</span>`).join("")}</div>` : ""}
+    <h3>Paraderos de esta ruta</h3>
+    ${stops.length ? stops.map((s, i) => `<button type="button" class="stoplink" data-s="${state.par.indexOf(s)}">📍 ${esc(s.name)}</button>`).join("") : `<p class="sub">Aún no hay paraderos asignados a esta ruta.</p>`}
+  `;
+  $("#rutas-list-view").hidden = true; el.hidden = false;
+  $("#back", el).addEventListener("click", clearSel);
+  el.querySelectorAll("[data-t]").forEach(b => b.addEventListener("click", () => { state.selT = Number(b.dataset.t); renderDetail(); styleLines(); }));
+  el.querySelectorAll("[data-s]").forEach(b => b.addEventListener("click", () => focusStop(state.par[Number(b.dataset.s)])));
+  $("#panel").scrollTop = 0;
+}
+
+/* ---------- Paraderos ---------- */
+function renderParList() {
+  const rows = state.par.filter(s => {
+    const q = fold($("#q-par").value.trim()), f = $("#f-par-ruta").value;
+    return (!q || fold(s.name).includes(q)) && (!f || s.codes.includes(f));
+  });
+  $("#par-count").textContent = `${rows.length} de ${state.par.length} paraderos`;
+  const ul = $("#par-list"); ul.innerHTML = "";
+  if (!rows.length) { ul.innerHTML = `<li class="empty">No hay paraderos con ese filtro.</li>`; return; }
+  for (const s of rows) {
+    const li = document.createElement("li");
+    const chips = s.codes.length ? s.codes.map(k => `<button type="button" class="chip" data-r="${esc(k)}" title="Ver ruta ${esc(k)}">${esc(k)}</button>`).join("") : `<span class="chip">Rutas por confirmar</span>`;
+    li.innerHTML = `<div class="item" style="cursor:default;flex-direction:column;align-items:stretch;gap:6px"><button type="button" class="stoplink" style="border:0;padding:0;font-weight:650">📍 ${esc(s.name)}</button><div class="chips" style="margin:0">${chips}</div></div>`;
+    $(".stoplink", li).addEventListener("click", () => focusStop(s));
+    li.querySelectorAll("[data-r]").forEach(b => b.addEventListener("click", () => goRuta(b.dataset.r)));
+    ul.appendChild(li);
+  }
+}
+function focusStop(s) {
+  state.selPar = s; updateMarkers();
+  if (!s.shown) { parLayer.addLayer(s.marker); s.shown = true; }
+  map.setView(s.ll, Math.max(map.getZoom(), 17));
+  s.marker.openPopup();
+  if (window.matchMedia("(max-width:820px)").matches) window.scrollTo(0, 0);
+}
+$("#q-par").addEventListener("input", () => { renderParList(); updateMarkers(); });
+$("#f-par-ruta").addEventListener("change", () => { renderParList(); updateMarkers(); });
+
+/* ---------- Convenciones ---------- */
+const legend = L.control({ position: "bottomleft" });
+legend.onAdd = () => {
+  const d = L.DomUtil.create("div", "legend");
+  const open = window.matchMedia("(min-width:821px)").matches ? " open" : "";
+  d.innerHTML = `<details${open}><summary>Convenciones</summary>
+    <div class="li"><span class="sw" style="border-color:#1b6ca8"></span>Ruta (cada color es una ruta)</div>
+    <div class="li"><span class="sw" style="border-color:#1b6ca8;border-top-width:8px"></span>Ruta y sentido elegidos</div>
+    <div class="li"><span class="sw" style="border-color:#1b6ca8;border-top-style:dashed"></span>Sentido contrario</div>
+    <div class="li"><span class="sw" style="border-color:#8a9199;opacity:.6"></span>Otras rutas</div>
+    <div class="li"><span class="pt"></span>Paradero</div>
+    <label><input type="checkbox" id="tg-bar"> Mostrar barrios y veredas</label></details>`;
+  L.DomEvent.disableClickPropagation(d);
+  return d;
+};
+legend.addTo(map);
+document.addEventListener("change", async e => {
+  if (e.target.id !== "tg-bar") return;
+  if (!e.target.checked) { if (barLayer) map.removeLayer(barLayer); return; }
+  if (!barLayer && !barLoading) {
+    barLoading = true;
+    try {
+      const j = await query(LAYER.barrios, true);
+      const nameKey = f => { const ks = Object.keys(f.properties || {}); return ks.find(k => /^(barrio|nombre|name|vereda|nom_)/i.test(k)) || ks.find(k => /barrio|nombre|vereda/i.test(k)); };
+      barLayer = L.geoJSON(j, { style: () => ({ color: "#6b7785", weight: 1, fillOpacity: .04, dashArray: "3 3" }), interactive: true,
+        onEachFeature: (f, l) => { const k = nameKey(f); if (k && txt(f.properties[k])) l.bindTooltip(String(f.properties[k]), { sticky: true }); } });
+    } catch (err) { $("#msg").innerHTML = `<div class="err">No se pudieron cargar los barrios (${esc(err.message)}).</div>`; e.target.checked = false; }
+    barLoading = false;
+  }
+  if (barLayer && e.target.checked) { barLayer.addTo(map); barLayer.bringToBack(); }
+});
+
+window.addEventListener("resize", () => map.invalidateSize());
+init();
+})();
+</script>
+</body>
+</html>
